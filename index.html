@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<meta charset="utf-8"/>
 		<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
 	</head>
 	<body>
@@ -106,27 +107,79 @@
 				<button class="gal-stop">Stop</button>
 			</div>
 		</div>
-
-
-
-
-
 <script type="text/javascript">
-$(".product-gallery").ready(function(){
-	$('.product-gallery .loader').hide();
-
+$(".product-gallery img").ready(function(){
+	var playView = '';
+	var pageX = '';
+	var sliding = false;
+	
 	$('.gal-next').click(function(){
 		goToNext();
 	});
+	$('.gal-prev').click(function(){
+		goToPrev();
+	});
+	$('.gal-play').click(function(){
+		clearInterval(playView);
+		playView = setInterval(function(){
+			goToNext();
+		}, 30);
+	});
+	$('.gal-stop').click(function(){
+		clearInterval(playView);
+	});
+	$('.product-gallery .loader').hide();
+	$(".product-gallery .images").mousedown(function(event){
+		sliding = true;
+	});
+	$(".product-gallery .images").mouseup(function(event){
+		sliding = false;
+	});
+	$( ".product-gallery .images" ).mousemove(function( event ) {
+	  	if(sliding){
+	    	if(pageX == ''){
+		    	pageX = event.pageX;
+		    }else{
+		    	var difference = event.pageX - pageX;
+		    	if(difference > 0){
+		    		pageX = event.pageX;
+		    		goToNext();
+		    	}else if(difference < 0){
+		    		pageX = event.pageX;
+		    		goToPrev();
+		    	}
+		    	/*
+		    	if(event.pageX > pageX){
+		    		pageX = event.pageX;
+		    		goToNext();
+		    	}else if(event.pageX < pageX){
+		    		pageX = event.pageX;
+		    		goToPrev();
+		    	}
+		    	*/
+		    }
+	    }
+	});
+
 });
 function goToNext(){
 	var currentElement = $('.product-gallery .images img.current').first();
 	if(currentElement.is(':last-child')){
-		currentElement.removeClass('current');
 		$('.product-gallery .images img').first().addClass('current');
-	}else{
 		currentElement.removeClass('current');
+	}else{
 		currentElement.next().addClass('current');
+		currentElement.removeClass('current');
+	}
+}
+function goToPrev(){
+	var currentElement = $('.product-gallery .images img.current').first();
+	if(currentElement.is(':first-child')){
+		$('.product-gallery .images img:last-child').addClass('current');
+		currentElement.removeClass('current');
+	}else{
+		currentElement.prev().addClass('current');
+		currentElement.removeClass('current');
 	}
 }
 </script>
@@ -138,28 +191,50 @@ function goToNext(){
 }
 .product-gallery .images {
 	overflow: hidden;
+	position: relative;
+}
+.product-gallery .images img:nth-child(1) {
+	position: relative;
 }
 .product-gallery .images img {
-	display: none;
+	position: absolute;
+	top: 0;
+	left: 0;
 	max-width: 100%;
+	z-index: 0;
 }
 .product-gallery .images img.current {
 	display: block;
+	z-index: 1;
 }
 .product-gallery .controls {
 	display: inline-block;
 	max-width: 100%;
+	z-index: 2;
+	position: relative;
 }
 .product-gallery .loader {
 	position: absolute;
 	width: 100%;
 	height: 100%;
 	background-color: #ffffe3;
+	z-index: 2;
 }
 .product-gallery .loader img {
 	top: calc(50% - 30px);
 	position: relative;
 	left: calc(50% - 30px);
+}
+.product-gallery .images::after {
+	content: '';
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	z-index: 6;
+	background-color: rgba(0,0,0,0);
+	top: 0;
+	left: 0;
+	cursor: pointer;
 }
 </style>
 
